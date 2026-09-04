@@ -40,6 +40,28 @@ def settings(**overrides):
     return base
 
 
+def test_settings_use_documented_form_schema():
+    form_settings = plugin.Settings().get_form_settings()
+
+    for name in ("Selection mode", "Preferred profile"):
+        field = form_settings[name]
+        assert all(
+            set(option) == {"value", "label"} for option in field["select_options"]
+        )
+        assert "options" not in field
+
+    assert form_settings["Radarr API key"]["input_type"] == "text"
+    assert form_settings["Sonarr API key"]["input_type"] == "text"
+    timeout = form_settings["Request timeout seconds"]
+    assert timeout["input_type"] == "slider"
+    assert timeout["slider_options"] == {
+        "min": 1,
+        "max": 120,
+        "step": 1,
+        "suffix": "s",
+    }
+
+
 class FakeClient:
     radarr = []
     sonarr = []

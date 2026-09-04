@@ -66,20 +66,20 @@ class Settings(PluginSettings):
         "Selection mode": {
             "input_type": "select",
             "label": "Audio selection mode",
-            "options": [
-                (MODE_KEEP_ALL, MODE_KEEP_ALL),
-                (MODE_REMOVE_COMMENTARY, MODE_REMOVE_COMMENTARY),
-                (MODE_SINGLE, MODE_SINGLE),
+            "select_options": [
+                {"value": MODE_KEEP_ALL, "label": MODE_KEEP_ALL},
+                {"value": MODE_REMOVE_COMMENTARY, "label": MODE_REMOVE_COMMENTARY},
+                {"value": MODE_SINGLE, "label": MODE_SINGLE},
             ],
         },
         "Preferred profile": {
             "input_type": "select",
             "label": "Preferred stream profile for single-stream mode",
-            "options": [
-                (PROFILE_BEST, PROFILE_BEST),
-                (PROFILE_STEREO, PROFILE_STEREO),
-                (PROFILE_51, PROFILE_51),
-                (PROFILE_71, PROFILE_71),
+            "select_options": [
+                {"value": PROFILE_BEST, "label": PROFILE_BEST},
+                {"value": PROFILE_STEREO, "label": PROFILE_STEREO},
+                {"value": PROFILE_51, "label": PROFILE_51},
+                {"value": PROFILE_71, "label": PROFILE_71},
             ],
         },
         "Strict preferred profile": {
@@ -95,7 +95,7 @@ class Settings(PluginSettings):
             "label": "Radarr URL",
         },
         "Radarr API key": {
-            "input_type": "password",
+            "input_type": "text",
             "label": "Radarr API key",
         },
         "Sonarr URL": {
@@ -103,12 +103,18 @@ class Settings(PluginSettings):
             "label": "Sonarr URL",
         },
         "Sonarr API key": {
-            "input_type": "password",
+            "input_type": "text",
             "label": "Sonarr API key",
         },
         "Request timeout seconds": {
-            "input_type": "number",
             "label": "Radarr/Sonarr request timeout in seconds",
+            "input_type": "slider",
+            "slider_options": {
+                "min": 1,
+                "max": 120,
+                "step": 1,
+                "suffix": "s",
+            },
         },
         "Path mappings": {
             "input_type": "textarea",
