@@ -2,7 +2,7 @@
   "id": "unmanic_plugin_keep_original_language_audio",
   "name": "Keep Original Language Audio",
   "author": "MatthijsSmets",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "tags": "audio,language,radarr,sonarr,ffmpeg,remux",
   "description": "Removes non-original-language audio streams using Radarr/Sonarr original language metadata. Copies all kept streams without transcoding and preserves video, subtitles, attachments, chapters, and metadata.",
   "icon": "icon.svg",

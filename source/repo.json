@@ -4,9 +4,9 @@
         "name": "Example Repo",
         "author": "MatthijsSmets",
         "icon": "",
-        "repo_data_url": "https://raw.githubusercontent.com/Josh5/unmanic-plugins/example/repo/repo.json",
+        "repo_data_url": "https://raw.githubusercontent.com/MatthijsSmets/unmanic-plugins/source/repo.json",
         "repo_data_checksum": "",
-        "repo_data_directory": "https://raw.githubusercontent.com/Josh5/unmanic-plugins/example/repo/"
+        "repo_data_directory": "https://raw.githubusercontent.com/MatthijsSmets/unmanic-plugins/example/repo/"
     },
     "plugins": ["Original Audio"]
 }
