@@ -6,7 +6,30 @@ This plugin only selects and removes audio streams. It never transcodes audio, d
 
 ## Installation
 
-Copy this plugin directory into your Unmanic plugins directory and enable **Keep Original Language Audio** in Unmanic.
+### From the custom repository (recommended)
+
+This plugin is distributed through the `MatthijsSmets/unmanic-plugins` custom
+Unmanic plugin repository. In Unmanic, go to **Settings -> Plugins -> Repositories**
+and add:
+
+```text
+https://raw.githubusercontent.com/MatthijsSmets/unmanic-plugins/repo/repo.json
+```
+
+Then open the **Plugins** page, find **Keep Original Language Audio** (id
+`unmanic_plugin_keep_original_language_audio`), install it, and enable it for
+the libraries where it should run.
+
+Unmanic caches the repository's `repo.json` and only checks for plugin updates
+periodically (and on manual refresh). After a new version is published, use the
+**Reload plugin repos**/refresh action on the Plugins page, or restart Unmanic,
+before expecting an updated version (see `info.json`'s `version` field) to
+appear as installable.
+
+### Manual install
+
+Alternatively, copy this plugin directory into your Unmanic plugins directory
+and enable **Keep Original Language Audio** in Unmanic.
 
 The plugin requires `ffprobe` and `ffmpeg` to be available to Unmanic. Python dependencies are listed in `requirements.txt`.
 
@@ -152,11 +175,20 @@ It uses `-c copy` and explicit stream mapping. It does not use audio or video en
 
 ## Recommended Unmanic plugin flow
 
+Unmanic's Library Management file test stage evaluates plugins in order and stops
+as soon as a plugin sets `add_file_to_pending_tasks`. This plugin should run first
+in file test so it can decide whether a file needs an audio-only change before
+another plugin queues the file for a different reason. Worker plugins run in
+order and pass their output to the next plugin, so this plugin should also run
+first there, before any plugin that reorders or transcodes the remaining audio.
+
 Library Management - File test:
 
 1. Keep Original Language Audio
 2. Transcode Audio
 3. Transcode Video Files
+4. Re-order subtitle streams by language
+5. Re-order audio streams by language
 
 Worker - Processing file:
 
@@ -167,6 +199,10 @@ Worker - Processing file:
 5. Transcode Video Files
 
 Run this plugin before the separate Audio Transcoder. This plugin removes unwanted audio streams; the Audio Transcoder performs later conversion such as stereo AAC.
+
+When first validating this plugin against a library, consider temporarily enabling
+only **Keep Original Language Audio** in both File test and Worker so its behavior
+can be verified in isolation, then re-add the other plugins in the order above.
 
 ## Examples
 
@@ -228,3 +264,96 @@ Safe no-op cases include:
 - Correct stream selection depends on accurate audio language tags and useful audio titles.
 - The plugin does not repair missing language tags.
 - Stream-copy remuxing must be supported by the input/output container combination used by FFmpeg.
+
+## Testing this plugin
+
+Verify the plugin against one file before enabling it for an entire library.
+
+1. Enable **Keep Original Language Audio** only (temporarily disable other File
+   test/Worker plugins on the library) so its behavior can be checked in
+   isolation.
+2. Pick a single file that has multiple audio languages and matches a Radarr
+   movie or Sonarr series/episode, and confirm the path mapping resolves it:
+
+   ```bash
+   ffprobe -v error \
+     -select_streams a \
+     -show_entries stream=index,codec_name,channels:stream_tags=language,title \
+     -of json \
+     "/path/to/file.mkv"
+   ```
+
+3. Trigger a library scan (or manually add the file to the task queue) and
+   watch the Unmanic task log for this plugin's messages, for example:
+
+   ```text
+   [Keep Original Language Audio] Library file test PASSED: queuing file because 3 audio stream(s) would be removed
+   [Keep Original Language Audio] Worker processing configured: removing 3 audio stream(s) with stream copy
+   [Keep Original Language Audio] Worker processing complete: FFmpeg command assigned
+   ```
+
+4. After the task finishes and Unmanic reports the file has been moved back
+   into the library, re-run the same `ffprobe` command against the library
+   path and confirm only the expected audio streams remain, and that video,
+   subtitles, attachments, chapters, and metadata are unchanged.
+
+## Troubleshooting
+
+**No Radarr/Sonarr match / file left unchanged**
+
+- Confirm the Radarr/Sonarr URL and API key are correct and reachable from Unmanic.
+- Confirm path mappings translate the path Unmanic sees into the path
+  Radarr/Sonarr reports for that movie/episode file. Movie files are matched
+  against Radarr; series/episode files are matched against Sonarr. A file that
+  cannot be matched, or that has no reported original language, is left
+  unchanged by design (see Fallback and idempotency below).
+- Check the plugin's log lines for `original language unavailable` or
+  `ffprobe unavailable` to see why a plan could not be built.
+
+**Plugin/repository appears stale after an update**
+
+- Use Unmanic's repository refresh action (or restart Unmanic) so the cached
+  `repo.json` is re-read and the new `info.json` `version` is detected.
+- Confirm the installed plugin version in Unmanic's Plugins page matches the
+  expected `version` in `info.json`.
+
+**File is never queued for processing**
+
+- Check that **Keep Original Language Audio** runs early enough in the File
+  test order; if another plugin queues the file first, Unmanic stops
+  evaluating later File test plugins for that run (see Recommended Unmanic
+  plugin flow above).
+- Look for the `Library file test did not queue file` log line and its
+  `reason` value, which reports why the plugin considered the file a safe
+  no-op (for example, the configured policy is already satisfied).
+
+**Unexpected audio streams still present, or streams unexpectedly removed**
+
+- Confirm the selection mode (Selection modes) and, in single-stream mode, the
+  preferred channel profile and strict-profile setting match expectations.
+- Check whether affected streams are being detected as commentary/audio
+  description based on their title (Commentary and audio-description
+  detection); titles are the only signal used for that detection.
+- Confirm audio language tags are not missing or `und`; such streams are
+  treated as unsafe and never match, per Language normalization.
+
+**Library file still shows old streams right after processing**
+
+- Unmanic moves large processed files back into the library through a
+  temporary `*.unmanic.part` file. For very large files this move/copy can
+  take noticeably longer than the FFmpeg remux itself. Wait for Unmanic's
+  post-processor log to report the file has been moved and the task cache
+  removed, then refresh the media server library, before assuming the plugin
+  did not work. Re-run `ffprobe` against the library file once the move is
+  confirmed complete.
+
+## Safety notes
+
+- This plugin overwrites the processed file in place as part of Unmanic's
+  normal worker/post-processing flow. Keep backups (or Unmanic's file history,
+  if enabled) of anything irreplaceable before running this plugin over a
+  library in bulk.
+- Validate the result on one file with `ffprobe` (and playback) before
+  enabling the plugin across an entire library, especially when using
+  single-stream mode or a strict preferred profile.
+
