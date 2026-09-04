@@ -34,6 +34,14 @@ except Exception:  # pragma: no cover - used by unit tests outside Unmanic
                 return dict(self._settings)
             return self._settings.get(key)
 
+        def get_default_setting(self, key=None):
+            if key is None:
+                return dict(self.settings)
+            return self.settings.get(key)
+
+        def get_form_settings(self):
+            return dict(self.form_settings)
+
 
 MODE_KEEP_ALL = "Keep all original-language audio"
 MODE_REMOVE_COMMENTARY = "Keep original-language audio and remove commentary/audio-description tracks"

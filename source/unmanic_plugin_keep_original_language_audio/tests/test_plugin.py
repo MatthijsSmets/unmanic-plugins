@@ -35,7 +35,7 @@ def probe(*audio_streams):
 
 
 def settings(**overrides):
-    base = dict(plugin.Settings.settings)
+    base = dict(plugin.Settings().get_default_setting())
     base.update(overrides)
     return base
 
