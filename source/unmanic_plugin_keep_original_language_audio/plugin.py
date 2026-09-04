@@ -60,7 +60,9 @@ PROFILE_71 = "Prefer 7.1"
 
 PLUGIN_LOG_PREFIX = "[Keep Original Language Audio]"
 
-LOGGER = logging.getLogger("unmanic.plugins.keep_original_language_audio")
+LOGGER = logging.getLogger(
+    "Unmanic.Plugin.unmanic_plugin_keep_original_language_audio"
+)
 
 
 class Settings(PluginSettings):
