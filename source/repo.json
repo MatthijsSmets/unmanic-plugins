@@ -8,5 +8,5 @@
         "repo_data_checksum": "",
         "repo_data_directory": "https://raw.githubusercontent.com/Josh5/unmanic-plugins/example/repo/"
     },
-    "plugins": []
+    "plugins": ["Original Audio"]
 }
