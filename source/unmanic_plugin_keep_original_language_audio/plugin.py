@@ -75,9 +75,12 @@ class Settings(PluginSettings):
             "input_type": "select",
             "label": "Audio selection mode",
             "select_options": [
-                {"value": MODE_KEEP_ALL, "label": MODE_KEEP_ALL},
-                {"value": MODE_REMOVE_COMMENTARY, "label": MODE_REMOVE_COMMENTARY},
-                {"value": MODE_SINGLE, "label": MODE_SINGLE},
+                {"value": MODE_KEEP_ALL, "label": "Keep all"},
+                {
+                    "value": MODE_REMOVE_COMMENTARY,
+                    "label": "Keep original and remove commentary",
+                },
+                {"value": MODE_SINGLE, "label": "Keep one"},
             ],
         },
         "Preferred profile": {
