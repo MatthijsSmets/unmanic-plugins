@@ -1,0 +1,30 @@
+{
+    "repo": {
+        "id": "repository.MatthijsSmets",
+        "name": "unmanic-plugins",
+        "icon": "",
+        "repo_data_directory": "https://raw.githubusercontent.com/MatthijsSmets/unmanic-plugins/repo/",
+        "repo_data_url": "https://raw.githubusercontent.com/MatthijsSmets/unmanic-plugins/repo/repo.json"
+    },
+    "plugins": [
+        {
+            "id": "unmanic_plugin_keep_original_language_audio",
+            "name": "Keep Original Language Audio",
+            "author": "MatthijsSmets",
+            "version": "1.0.0",
+            "tags": "audio,language,radarr,sonarr,ffmpeg,remux",
+            "description": "Removes non-original-language audio streams using Radarr/Sonarr original language metadata. Copies all kept streams without transcoding and preserves video, subtitles, attachments, chapters, and metadata.",
+            "icon": "icon.svg",
+            "priorities": {
+                "on_library_management_file_test": 50,
+                "on_worker_process": 1
+            },
+            "compatibility": [
+                2
+            ],
+            "platform": [
+                "all"
+            ]
+        }
+    ]
+}
